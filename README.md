@@ -4,7 +4,7 @@
 
 **Tohu-Terminal** is an interactive, browser-based educational lab that teaches AI enthusiasts, security analysts and prompt engineers about a real and underestimated attack vector: **semantic obfuscation through invented languages and cryptographic Prompt Injection**.
 
-🌐 **[Try it live →](https://YOUR-USERNAME.github.io/RosettaPrompting/)**
+🌐 **[Try it live →](https://fabion4.github.io/RosettaPrompting/)**
 
 ---
 
