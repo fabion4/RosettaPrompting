@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tohu-Terminal — Compilatore Umano</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════
+       WELCOME / INTRO MODAL
+       ══════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-welcome">
+    <div class="modal modal-welcome">
+      <div class="welcome-hero">
+        <div class="welcome-logo">⊗ TOHU-TERMINAL</div>
+        <p class="welcome-tagline">Un laboratorio didattico sull'offuscamento del codice e le <em>Prompt Injection crittografiche</em></p>
+      </div>
+
+      <div class="welcome-what">
+        <h3>🎯 A cosa serve questo portale?</h3>
+        <p>Impersoni un <strong>Compilatore Umano</strong>: devi decodificare linguaggi di scripting via via più alieni, scritti con glifi gotici, rune, simboli alchemici e Esagrammi I-Ching. Ogni livello insegna una tecnica reale usata per <strong>rendere cieco un filtro AI</strong>.</p>
+        <p>Puoi risolvere le sfide <strong>a mano</strong> oppure incollare la stringa in un LLM (ChatGPT, Claude…) e osservare cosa succede. Nei livelli avanzati, anche i migliori modelli falliranno.</p>
+      </div>
+
+      <!-- Card generate dinamicamente da JS -->
+      <div class="level-cards" id="welcome-cards"></div>
+
+      <div class="welcome-modes">
+        <div class="mode-box">
+          <span class="mode-icon">✍️</span>
+          <span class="mode-title">Risolvi a mano</span>
+          <span class="mode-desc">Scrivi il Bash equivalente nel campo di lavoro e valida subito.</span>
+        </div>
+        <div class="mode-box">
+          <span class="mode-icon">🤖</span>
+          <span class="mode-title">Sfida un LLM</span>
+          <span class="mode-desc">Copia il prompt già pronto e incollalo in ChatGPT o Claude. Confronta la risposta!</span>
+        </div>
+      </div>
+
+      <button class="btn btn-start" id="btn-start">Inizia l'Avventura →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       HEADER
+       ══════════════════════════════════════════ -->
+  <header class="app-header">
+    <div class="header-left">
+      <button class="btn-info-toggle" id="btn-reopen-intro" title="Cos'è questo portale?">?</button>
+      <span class="logo">⊗ TOHU-TERMINAL</span>
+      <span class="tagline">Prompt Injection &amp; Code Obfuscation Lab</span>
+    </div>
+    <div class="header-right">
+      <!-- Pip generati dinamicamente da JS -->
+      <div class="progress-levels" id="progress-levels"></div>
+      <div class="score-display">TEST&nbsp;<span id="test-counter">0</span>/<span id="test-total">3</span></div>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════════
+       MAIN — TRE PANNELLI
+       ══════════════════════════════════════════ -->
+  <main class="panels-container">
+
+    <!-- ─── SINISTRA: Stele di Rosetta ─── -->
+    <aside class="panel panel-corpus">
+      <div class="panel-header">
+        <h2>📜 Stele di Rosetta</h2>
+        <span class="panel-subtitle" id="corpus-subtitle">Livello 1</span>
+      </div>
+
+      <!-- Tab switcher -->
+      <div class="corpus-tabs">
+        <button class="corpus-tab active" id="ctab-grammar" data-ctab="grammar">📖 Grammatica</button>
+        <button class="corpus-tab" id="ctab-corpus" data-ctab="corpus">🔤 Corpus</button>
+      </div>
+
+      <!-- Vista GRAMMATICA -->
+      <div class="corpus-view" id="view-grammar">
+        <div class="corpus-intro" id="corpus-intro"></div>
+        <div class="corpus-content" id="corpus-content"></div>
+      </div>
+
+      <!-- Vista CORPUS (10 esempi bilingui) -->
+      <div class="corpus-view" id="view-corpus" style="display:none">
+        <div class="corpus-examples" id="corpus-examples"></div>
+      </div>
+    </aside>
+
+    <!-- ─── CENTRO: Sandbox di Decodifica ─── -->
+    <section class="panel panel-sandbox">
+      <div class="panel-header">
+        <h2>🔬 Sandbox di Decodifica</h2>
+        <span class="level-badge" id="level-badge">LIVELLO 1</span>
+      </div>
+
+      <div class="sandbox-scroll">
+
+        <!-- Stringa aliena -->
+        <div class="challenge-area">
+          <div class="section-label">▸ STRINGA ALIENA DA DECODIFICARE</div>
+          <div class="challenge-string" id="challenge-string"></div>
+
+          <!-- Azioni sulla sfida -->
+          <div class="challenge-actions">
+            <button class="btn btn-copy-challenge" id="btn-copy-challenge" title="Copia la stringa per sfidarci un LLM">📋 Copia Stringa</button>
+            <button class="btn btn-llm-prompt" id="btn-llm-prompt">🤖 Genera Prompt LLM</button>
+            <button class="btn btn-show-solution" id="btn-show-solution">👁 Mostra Soluzione</button>
+            <button class="btn btn-skip" id="btn-skip">⏭ Salta</button>
+          </div>
+
+          <div class="challenge-hint" id="challenge-hint"></div>
+        </div>
+
+        <!-- Pannello LLM Prompt (nascosto di default) -->
+        <div class="llm-panel" id="llm-panel" style="display:none">
+          <div class="llm-panel-header">
+            <span>🤖 Prompt pronto — incolla in ChatGPT, Claude, Gemini…</span>
+            <div class="llm-copy-btns">
+              <button class="btn btn-copy-llm" id="btn-copy-llm-bare" title="Solo stringa aliena + dizionario, senza istruzioni di sistema">📋 Solo Stringa+Dizionario</button>
+              <button class="btn btn-copy-llm btn-copy-llm-full" id="btn-copy-llm-full" title="Prompt completo con istruzioni per l'LLM">📋 Prompt Completo</button>
+            </div>
+          </div>
+          <div class="llm-tabs">
+            <button class="llm-tab active" id="tab-bare" data-tab="bare">Solo Stringa (senza dizionario)</button>
+            <button class="llm-tab" id="tab-full" data-tab="full">Con Dizionario + Istruzioni</button>
+          </div>
+          <pre class="llm-prompt-text" id="llm-prompt-text"></pre>
+          <div class="llm-tip">
+            💡 <strong>Prova entrambe le varianti:</strong> senza istruzioni l'LLM deve "indovinare" la grammatica; con le istruzioni equivale a un attacco <em>Few-Shot</em> reale. Dal Livello 4 il divario diventa drastico.
+          </div>
+        </div>
+
+        <!-- Stack Visualizer (solo Livello 3) -->
+        <div class="stack-section" id="stack-section" style="display:none">
+          <div class="stack-header">
+            <h3>⚙ Visualizzatore Stack LIFO</h3>
+            <div class="stack-controls">
+              <button class="btn btn-stack-ctrl" id="btn-stack-reset" title="Ricomincia dall'inizio" disabled>⏮</button>
+              <button class="btn btn-stack-ctrl" id="btn-stack-prev"  title="Passo precedente"      disabled>◀</button>
+              <span class="stack-step-counter" id="stack-step-counter">—</span>
+              <button class="btn btn-stack-ctrl" id="btn-stack-next"  title="Passo successivo">▶</button>
+              <button class="btn btn-analyze"   id="btn-analyze"      title="Riproduzione automatica">⚡ Auto</button>
+            </div>
+          </div>
+          <div class="stack-container">
+            <div class="stack-column">
+              <div class="stack-top-label">TOP ▲</div>
+              <div class="stack-visual" id="stack-visual">
+                <div class="stack-empty">Stack vuoto</div>
+              </div>
+              <div class="stack-bottom-label">▼ BOTTOM</div>
+            </div>
+            <div class="stack-info">
+              <div class="stack-description" id="stack-description">
+                Premi "Analizza" per vedere i token elaborati passo dopo passo.
+              </div>
+              <div class="stack-steps" id="stack-steps"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Workspace: scrivi la tua soluzione -->
+        <div class="workspace-area">
+          <div class="section-label">▸ LA TUA TRADUZIONE BASH
+            <span class="label-sub">Premi Invio oppure il pulsante per validare</span>
+          </div>
+          <textarea
+            class="bash-input"
+            id="bash-input"
+            placeholder="es.  if [ $u -gt 0 ]; then echo &quot;ALERT&quot;; fi"
+            spellcheck="false"
+            autocomplete="off"
+            autocorrect="off"
+            rows="3"
+          ></textarea>
+          <div class="workspace-actions">
+            <button class="btn btn-hint" id="btn-hint">💡 Suggerimento</button>
+            <button class="btn btn-submit" id="btn-submit">⚡ Valida Traduzione</button>
+          </div>
+        </div>
+
+      </div><!-- /sandbox-scroll -->
+    </section>
+
+    <!-- ─── DESTRA: Terminale ─── -->
+    <aside class="panel panel-terminal">
+      <div class="panel-header">
+        <h2>⬛ Terminale di Validazione</h2>
+        <div class="terminal-dots">
+          <span class="dot dot-red"></span>
+          <span class="dot dot-yellow"></span>
+          <span class="dot dot-green"></span>
+        </div>
+      </div>
+      <div class="terminal-output" id="terminal-output"></div>
+    </aside>
+
+  </main>
+
+  <!-- ══════════════════════════════════════════
+       MODAL: Lezione tra i Livelli
+       ══════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-lesson" style="display:none">
+    <div class="modal">
+      <div class="modal-icon" id="modal-icon">🧠</div>
+      <h2 class="modal-title" id="modal-title"></h2>
+      <div class="modal-concept" id="modal-concept"></div>
+      <div class="modal-body" id="modal-body"></div>
+      <button class="btn btn-next" id="btn-modal-next">Prossimo Livello →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       MODAL: Vittoria Finale
+       ══════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-victory" style="display:none">
+    <div class="modal modal-victory">
+      <div class="modal-icon">🏆</div>
+      <h2 class="modal-title">COMPILATORE MAESTRO</h2>
+      <p class="victory-subtitle" id="victory-subtitle">Hai completato tutti i livelli del Tohu-Terminal.</p>
+      <div class="victory-warning">
+        <strong>⚠ IL RISCHIO REALE — Ancoraggio Semantico Nullo</strong><br><br>
+        Un attaccante può insegnare a un LLM questo linguaggio via <em>Few-Shot Prompting</em>, fargli generare payload malevoli nei glifi, e poi eseguire un decodificatore locale.<br><br>
+        I filtri AI non scattano perché <strong>non esistono stringhe malevole riconoscibili</strong>. Questo è il limite attuale della difesa semantica.
+      </div>
+      <button class="btn btn-restart" id="btn-restart">↺ Ricomincia dall'Inizio</button>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
